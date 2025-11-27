@@ -114,6 +114,9 @@ class CScrollingLayout : public IHyprLayout {
     SP<HOOK_CALLBACK_FN>            m_configCallback;
     SP<HOOK_CALLBACK_FN>            m_focusCallback;
 
+    float                           m_lastRemovedColumnWidth;
+    float                           m_lastRemovedColumnLastWidth;
+
     struct {
         bool isMovingColumn    = false;
         int  targetWorkspaceID = -1;
@@ -126,6 +129,9 @@ class CScrollingLayout : public IHyprLayout {
     SP<SScrollingWindowData> findBestNeighbor(SP<SScrollingWindowData> pCurrent, SP<SColumnData> pTargetCol);
     SP<SWorkspaceData>       dataFor(PHLWORKSPACE ws);
     SP<SScrollingWindowData> dataFor(PHLWINDOW w);
+    void                     setLastRemovedColumnData(WP<SColumnData> data);
+    float                    getLastRemovedColumnWidth();
+    float                    getLastRemovedColumnLastWidth();
     SP<SWorkspaceData>       currentWorkspaceData();
 
     void                     applyNodeDataToWindow(SP<SScrollingWindowData> node, bool instant, bool hasWindowsRight, bool hasWindowsLeft);

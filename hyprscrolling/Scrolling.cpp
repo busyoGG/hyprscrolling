@@ -12,6 +12,7 @@
 
 #include <hyprutils/string/ConstVarList.hpp>
 #include <hyprutils/utils/ScopeGuard.hpp>
+#include <src/debug/Log.hpp>
 using namespace Hyprutils::String;
 using namespace Hyprutils::Utils;
 
@@ -577,7 +578,7 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 // Debug::log(LOG, "posX {} leftLimit {} rightLimit {} mouseX {}", posX, leftLimit, rightLimit, mouseX);
 
                 if (isInMiddle60Percent) {
-                    // 如果鼠标在中间 60% 区域内，按照原来方式放置窗口
+                    // 如果鼠标在中间 40% 区域内，按照原来方式放置窗口
                     const auto TOP = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().middle().y > mouseY;
                     droppingColumn->add(window, TOP ? (IDX == 0 ? -1 : IDX - 1) : (IDX));
                 } else {
@@ -586,18 +587,24 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                     // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
                     // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
                     auto col = isLeft ? workspaceData->add(idx - 1) : workspaceData->add(idx);
-                    // Debug::log(LOG, "left {} idx {}", isLeft, idx);
+
                     col->add(window);
+                    float width = getLastRemovedColumnWidth();
+                    if (width != 0.0) {
+                        col->columnWidth     = getLastRemovedColumnWidth();
+                        col->lastColumnWidth = getLastRemovedColumnLastWidth();
+                    }
                     workspaceData->fitCol(col);
                 }
             } else {
                 // 如果没有目标窗口，直接将窗口添加到新的列
                 auto idx = workspaceData->idx(droppingColumn);
                 auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
+                // window->
                 col->add(window);
                 workspaceData->fitCol(col);
             }
-            workspaceData->fitCol(droppingColumn);
+            // workspaceData->fitCol(droppingColumn);
         } else {
             auto idx = workspaceData->idx(droppingColumn);
             auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
@@ -615,6 +622,8 @@ void CScrollingLayout::onWindowRemovedTiling(PHLWINDOW window) {
     if (!DATA)
         return;
 
+    setLastRemovedColumnData(DATA->column);
+    // Debug::log(LOG, "removed column {}", DATA->column.lock()->columnWidth);
     const auto WS = DATA->column->workspace.lock();
 
     if (!WS->next(DATA->column.lock())) {
@@ -670,6 +679,7 @@ void CScrollingLayout::onBeginDragWindow() {
 }
 
 void CScrollingLayout::resizeActiveWindow(const Vector2D& delta, eRectCorner corner, PHLWINDOW pWindow) {
+    Debug::log(LOG, "resizeActiveWindow");
     const auto PWINDOW  = pWindow ? pWindow : Desktop::focusState()->window();
     Vector2D   modDelta = delta;
 
@@ -1593,4 +1603,17 @@ SP<SWorkspaceData> CScrollingLayout::currentWorkspaceData() {
 
 CBox CScrollingLayout::usableAreaFor(PHLMONITOR m) {
     return CBox{m->m_reservedTopLeft, m->m_size - m->m_reservedTopLeft - m->m_reservedBottomRight};
+}
+
+void CScrollingLayout::setLastRemovedColumnData(WP<SColumnData> data) {
+    m_lastRemovedColumnWidth     = data->columnWidth;
+    m_lastRemovedColumnLastWidth = data->lastColumnWidth;
+}
+
+float CScrollingLayout::getLastRemovedColumnWidth() {
+    return m_lastRemovedColumnWidth;
+}
+
+float CScrollingLayout::getLastRemovedColumnLastWidth() {
+    return m_lastRemovedColumnLastWidth;
 }
