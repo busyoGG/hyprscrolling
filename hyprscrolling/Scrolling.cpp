@@ -897,10 +897,10 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
 
             const auto COL = DATA->next(WDATA->column.lock());
             if (!COL) {
-                // move to max
-                DATA->leftOffset = DATA->maxWidth();
-                DATA->recalculate();
-                focusWindowUpdate(nullptr);
+                // // move to max
+                // DATA->leftOffset = DATA->maxWidth();
+                // DATA->recalculate();
+                // focusWindowUpdate(nullptr);
                 return {};
             }
 
