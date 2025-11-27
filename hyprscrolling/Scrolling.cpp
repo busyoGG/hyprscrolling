@@ -1275,7 +1275,7 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
         if (direction == "l")
             target_idx = (current_idx == 0) ? current_idx : (current_idx - 1);
         else if (direction == "r")
-            target_idx = (current_idx == (int64_t)col_count - 1) ? current_idx : (current_idx + 1);
+            target_idx = (current_idx == (int64_t)col_count - 1) ? (current_idx - 1) : (current_idx + 1);
         else
             return {};
 
