@@ -572,7 +572,7 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 // 判断鼠标是否在中间 60% 区域内
                 bool isInMiddle60Percent = (mouseX >= leftLimit && mouseX <= rightLimit);
 
-                Debug::log(LOG, "posX {} leftLimit {} rightLimit {} mouseX {}", posX, leftLimit, rightLimit, mouseX);
+                // Debug::log(LOG, "posX {} leftLimit {} rightLimit {} mouseX {}", posX, leftLimit, rightLimit, mouseX);
 
                 if (isInMiddle60Percent) {
                     // 如果鼠标在中间 60% 区域内，按照原来方式放置窗口
@@ -580,8 +580,12 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                     droppingColumn->add(window, TOP ? (IDX == 0 ? -1 : IDX - 1) : (IDX));
                 } else {
                     // 否则，创建一个新列并放置窗口
-                    auto idx = workspaceData->idx(droppingColumn);
-                    auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
+                    // auto idx = workspaceData->idx(droppingColumn);
+                    // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
+                    const auto LEFT = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().middle().x > mouseX;
+                    // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
+                    auto col = LEFT ? (IDX == 0 ? workspaceData->add() : workspaceData->add(IDX - 1)) : workspaceData->add(IDX);
+
                     col->add(window);
                     workspaceData->fitCol(col);
                 }
