@@ -1014,10 +1014,10 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
 
             const auto USABLE = usableAreaFor(WORKDATA->workspace->m_monitor.lock());
 
-            WDATA->column->lastColumnWidth = WDATA->column->columnWidth;
             if (WDATA->column->columnWidth == 1.F) {
                 WDATA->column->columnWidth = WDATA->column->lastColumnWidth;
             } else {
+                WDATA->column->lastColumnWidth = WDATA->column->columnWidth;
                 WDATA->column->columnWidth = 1.F;
             }
 
@@ -1479,37 +1479,33 @@ void CScrollingLayout::moveWindowTo(PHLWINDOW w, const std::string& dir, bool si
     if (dir == "l") {
         const auto COL = WS->prev(DATA->column.lock());
 
+        DATA->column->remove(w);
         if (!COL) {
-            // const auto NEWCOL = WS->add(-1);
-            // NEWCOL->add(DATA);
-            // WS->centerOrFitCol(NEWCOL);
-        } else {
-            DATA->column->remove(w);
-            // if (COL->windowDatas.size() > 0)
-            //     COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
-            // else
-            //     COL->add(DATA);
-            const auto NEWCOL = WS->add(-1); // 新建左侧列
-            NEWCOL->add(DATA);               // 添加到新列
+            const auto NEWCOL = WS->add(-1);
+            NEWCOL->add(DATA);
             WS->centerOrFitCol(NEWCOL);
+        } else {
+            if (COL->windowDatas.size() > 0)
+                COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
+            else
+                COL->add(DATA);
+            WS->centerOrFitCol(COL);
         }
     } else if (dir == "r") {
         const auto COL = WS->next(DATA->column.lock());
 
+        DATA->column->remove(w);
         if (!COL) {
             // make a new one
-            // const auto NEWCOL = WS->add();
-            // NEWCOL->add(DATA);
-            // WS->centerOrFitCol(NEWCOL);
-        } else {
-            DATA->column->remove(w);
-            // if (COL->windowDatas.size() > 0)
-            //     COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
-            // else
-            //     COL->add(DATA);
-            const auto NEWCOL = WS->add(); // 新建左侧列
-            NEWCOL->add(DATA);             // 添加到新列
+            const auto NEWCOL = WS->add();
+            NEWCOL->add(DATA);
             WS->centerOrFitCol(NEWCOL);
+        } else {
+            if (COL->windowDatas.size() > 0)
+                COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
+            else
+                COL->add(DATA);
+            WS->centerOrFitCol(COL);
         }
 
     } else if (dir == "t" || dir == "u")
