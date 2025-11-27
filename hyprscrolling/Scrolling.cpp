@@ -580,7 +580,7 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                     droppingColumn->add(window, TOP ? (IDX == 0 ? -1 : IDX - 1) : (IDX));
                 } else {
                     // 否则，创建一个新列并放置窗口
-                    // auto idx = workspaceData->idx(droppingColumn);
+                    auto idx = workspaceData->idx(droppingColumn);
                     // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
                     const auto LEFT = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().middle().x > mouseX;
                     // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
