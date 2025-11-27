@@ -558,7 +558,7 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 // 获取目标窗口在列中的索引
 
                 // 获取目标列的宽度
-                const auto columnWidth = droppingColumn->columnWidth;
+                const auto columnWidth = droppingOn->m_size.x;
 
                 // 获取鼠标的水平位置
                 const int mouseX = g_pInputManager->getMouseCoordsInternal().x;
