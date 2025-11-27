@@ -42,7 +42,7 @@ commit_pins = [
 
 [hyprscrolling-mod]
 description = "A plugin to add a scrolling layout"
-authors = ["Vaxry"]
+authors = ["busyoGG"]
 output = "hyprscrolling-mod/hyprscrolling-mod.so"
 build = [
     "make -C hyprscrolling all",
