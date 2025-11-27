@@ -565,7 +565,7 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 const int mouseY = g_pInputManager->getMouseCoordsInternal().y;
 
                 // 计算列的中间 60% 区域的范围
-                int posX = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().pos().x;
+                int       posX       = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().pos().x;
                 const int leftLimit  = posX + columnWidth * 0.20;
                 const int rightLimit = posX + columnWidth * 0.80;
 
@@ -1485,11 +1485,13 @@ void CScrollingLayout::moveWindowTo(PHLWINDOW w, const std::string& dir, bool si
             // WS->centerOrFitCol(NEWCOL);
         } else {
             DATA->column->remove(w);
-            if (COL->windowDatas.size() > 0)
-                COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
-            else
-                COL->add(DATA);
-            WS->centerOrFitCol(COL);
+            // if (COL->windowDatas.size() > 0)
+            //     COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
+            // else
+            //     COL->add(DATA);
+            const auto NEWCOL = WS->add(-1); // 新建左侧列
+            NEWCOL->add(DATA);               // 添加到新列
+            WS->centerOrFitCol(NEWCOL);
         }
     } else if (dir == "r") {
         const auto COL = WS->next(DATA->column.lock());
@@ -1501,11 +1503,13 @@ void CScrollingLayout::moveWindowTo(PHLWINDOW w, const std::string& dir, bool si
             // WS->centerOrFitCol(NEWCOL);
         } else {
             DATA->column->remove(w);
-            if (COL->windowDatas.size() > 0)
-                COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
-            else
-                COL->add(DATA);
-            WS->centerOrFitCol(COL);
+            // if (COL->windowDatas.size() > 0)
+            //     COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
+            // else
+            //     COL->add(DATA);
+            const auto NEWCOL = WS->add(); // 新建左侧列
+            NEWCOL->add(DATA);             // 添加到新列
+            WS->centerOrFitCol(NEWCOL);
         }
 
     } else if (dir == "t" || dir == "u")
