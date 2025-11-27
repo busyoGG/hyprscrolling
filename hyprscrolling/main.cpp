@@ -44,11 +44,11 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 
     g_pScrollingLayout = makeUnique<CScrollingLayout>();
 
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling:fullscreen_on_one_column", Hyprlang::INT{0});
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling:column_width", Hyprlang::FLOAT{0.5F});
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling:focus_fit_method", Hyprlang::INT{0});
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling:follow_focus", Hyprlang::INT{1});
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling:explicit_column_widths", Hyprlang::STRING{"0.333, 0.5, 0.667, 1.0"});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:fullscreen_on_one_column", Hyprlang::INT{0});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:column_width", Hyprlang::FLOAT{0.5F});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:focus_fit_method", Hyprlang::INT{0});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:follow_focus", Hyprlang::INT{1});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:explicit_column_widths", Hyprlang::STRING{"0.333, 0.5, 0.667, 1.0"});
     HyprlandAPI::addLayout(PHANDLE, "scrolling", g_pScrollingLayout.get());
 
     if (success)

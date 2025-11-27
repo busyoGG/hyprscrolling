@@ -141,7 +141,7 @@ bool SColumnData::has(PHLWINDOW w) {
 }
 
 SP<SColumnData> SWorkspaceData::add() {
-    static const auto PCOLWIDTH = CConfigValue<Hyprlang::FLOAT>("plugin:hyprscrolling:column_width");
+    static const auto PCOLWIDTH = CConfigValue<Hyprlang::FLOAT>("plugin:hyprscrolling-mod:column_width");
     auto              col       = columns.emplace_back(makeShared<SColumnData>(self.lock()));
     col->self                   = col;
     col->columnWidth            = *PCOLWIDTH;
@@ -149,7 +149,7 @@ SP<SColumnData> SWorkspaceData::add() {
 }
 
 SP<SColumnData> SWorkspaceData::add(int after) {
-    static const auto PCOLWIDTH = CConfigValue<Hyprlang::FLOAT>("plugin:hyprscrolling:column_width");
+    static const auto PCOLWIDTH = CConfigValue<Hyprlang::FLOAT>("plugin:hyprscrolling-mod:column_width");
     auto              col       = makeShared<SColumnData>(self.lock());
     col->self                   = col;
     col->columnWidth            = *PCOLWIDTH;
@@ -202,7 +202,7 @@ void SWorkspaceData::centerCol(SP<SColumnData> c) {
     if (!c)
         return;
 
-    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:fullscreen_on_one_column");
+    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:fullscreen_on_one_column");
 
     PHLMONITOR        PMONITOR    = workspace->m_monitor.lock();
     double            currentLeft = 0;
@@ -224,7 +224,7 @@ void SWorkspaceData::fitCol(SP<SColumnData> c) {
     if (!c)
         return;
 
-    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:fullscreen_on_one_column");
+    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:fullscreen_on_one_column");
 
     PHLMONITOR        PMONITOR    = workspace->m_monitor.lock();
     double            currentLeft = 0;
@@ -246,7 +246,7 @@ void SWorkspaceData::centerOrFitCol(SP<SColumnData> c) {
     if (!c)
         return;
 
-    static const auto PFITMETHOD = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:focus_fit_method");
+    static const auto PFITMETHOD = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:focus_fit_method");
 
     if (*PFITMETHOD == 1)
         fitCol(c);
@@ -255,7 +255,7 @@ void SWorkspaceData::centerOrFitCol(SP<SColumnData> c) {
 }
 
 SP<SColumnData> SWorkspaceData::atCenter() {
-    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:fullscreen_on_one_column");
+    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:fullscreen_on_one_column");
 
     PHLMONITOR        PMONITOR    = workspace->m_monitor.lock();
     double            currentLeft = leftOffset;
@@ -274,7 +274,7 @@ SP<SColumnData> SWorkspaceData::atCenter() {
 }
 
 void SWorkspaceData::recalculate(bool forceInstant) {
-    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:fullscreen_on_one_column");
+    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:fullscreen_on_one_column");
 
     if (!workspace) {
         Debug::log(ERR, "[scroller] broken internal state on workspace data");
@@ -311,7 +311,7 @@ void SWorkspaceData::recalculate(bool forceInstant) {
 }
 
 double SWorkspaceData::maxWidth() {
-    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:fullscreen_on_one_column");
+    static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:fullscreen_on_one_column");
 
     PHLMONITOR        PMONITOR    = workspace->m_monitor.lock();
     double            currentLeft = 0;
@@ -472,7 +472,7 @@ void CScrollingLayout::applyNodeDataToWindow(SP<SScrollingWindowData> data, bool
 }
 
 void CScrollingLayout::onEnable() {
-    static const auto PCONFWIDTHS = CConfigValue<Hyprlang::STRING>("plugin:hyprscrolling:explicit_column_widths");
+    static const auto PCONFWIDTHS = CConfigValue<Hyprlang::STRING>("plugin:hyprscrolling-mod:explicit_column_widths");
 
     m_configCallback = g_pHookSystem->hookDynamic("configReloaded", [this](void* hk, SCallbackInfo& info, std::any param) {
         // bitch ass
@@ -492,7 +492,7 @@ void CScrollingLayout::onEnable() {
         if (!PWINDOW)
             return;
 
-        static const auto PFOLLOW_FOCUS = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:follow_focus");
+        static const auto PFOLLOW_FOCUS = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:follow_focus");
 
         if (!*PFOLLOW_FOCUS)
             return;
@@ -860,7 +860,7 @@ SP<SScrollingWindowData> CScrollingLayout::findBestNeighbor(SP<SScrollingWindowD
 
 std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::string message) {
     static auto centerOrFit = [](const SP<SWorkspaceData> WS, const SP<SColumnData> COL) -> void {
-        static const auto PFITMETHOD = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:focus_fit_method");
+        static const auto PFITMETHOD = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:focus_fit_method");
         if (*PFITMETHOD == 1)
             WS->fitCol(COL);
         else
@@ -1018,7 +1018,7 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
                 WDATA->column->columnWidth = WDATA->column->lastColumnWidth;
             } else {
                 WDATA->column->lastColumnWidth = WDATA->column->columnWidth;
-                WDATA->column->columnWidth = 1.F;
+                WDATA->column->columnWidth     = 1.F;
             }
 
             WORKDATA->leftOffset = 0;
@@ -1384,14 +1384,14 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
         Desktop::focusState()->fullWindowFocus(windowsToMove.front());
         g_pCompositor->warpCursorTo(windowsToMove.front()->middle());
     } else if (ARGS[0] == "togglefit") {
-        static const auto PFITMETHOD = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:focus_fit_method");
+        static const auto PFITMETHOD = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:focus_fit_method");
         auto&             fitMethod  = *PFITMETHOD.ptr();
         const int         toggled    = fitMethod ^ 1;
 
         fitMethod = toggled;
 
         const auto        focusedData = dataFor(Desktop::focusState()->window());
-        static const auto PFSONONE    = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling:fullscreen_on_one_column");
+        static const auto PFSONONE    = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:fullscreen_on_one_column");
 
         for (const auto& ws : m_workspaceDatas) {
             if (!ws || ws->columns.empty())
