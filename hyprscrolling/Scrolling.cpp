@@ -3,11 +3,11 @@
 #include <algorithm>
 
 #include <hyprland/src/Compositor.hpp>
-#include <hyprland/src/desktop/state/FocusState.hpp>
-#include <hyprland/src/managers/input/InputManager.hpp>
-#include <hyprland/src/managers/eventLoop/EventLoopManager.hpp>
 #include <hyprland/src/config/ConfigManager.hpp>
 #include <hyprland/src/config/ConfigValue.hpp>
+#include <hyprland/src/desktop/state/FocusState.hpp>
+#include <hyprland/src/managers/eventLoop/EventLoopManager.hpp>
+#include <hyprland/src/managers/input/InputManager.hpp>
 #include <hyprland/src/render/Renderer.hpp>
 
 #include <hyprutils/string/ConstVarList.hpp>
@@ -552,12 +552,42 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
         workspaceData->fitCol(col);
     } else {
         if (window->m_draggingTiled) {
+            // 如果窗口正在拖动，并且它是以平铺（tiled）模式进行拖动的
             if (droppingOn) {
                 const auto IDX = droppingColumn->idx(droppingOn);
-                const auto TOP = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().middle().y > g_pInputManager->getMouseCoordsInternal().y;
-                droppingColumn->add(window, TOP ? (IDX == 0 ? -1 : IDX - 1) : (IDX));
-            } else
-                droppingColumn->add(window);
+                // 获取目标窗口在列中的索引
+
+                // 获取目标列的宽度
+                const auto columnWidth = droppingColumn->getWidth();
+
+                // 获取鼠标的水平位置
+                const int mouseX = g_pInputManager->getMouseCoordsInternal().x;
+
+                // 计算列的中间 60% 区域的范围
+                const int leftLimit  = droppingColumn->getX() + columnWidth * 0.20;
+                const int rightLimit = droppingColumn->getX() + columnWidth * 0.80;
+
+                // 判断鼠标是否在中间 60% 区域内
+                bool isInMiddle60Percent = (mouseX >= leftLimit && mouseX <= rightLimit);
+
+                if (isInMiddle60Percent) {
+                    // 如果鼠标在中间 60% 区域内，按照原来方式放置窗口
+                    const auto TOP = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().middle().y > mouseY;
+                    droppingColumn->add(window, TOP ? (IDX == 0 ? -1 : IDX - 1) : (IDX));
+                } else {
+                    // 否则，创建一个新列并放置窗口
+                    auto idx = workspaceData->idx(droppingColumn);
+                    auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
+                    col->add(window);
+                    workspaceData->fitCol(col);
+                }
+            } else {
+                // 如果没有目标窗口，直接将窗口添加到新的列
+                auto idx = workspaceData->idx(droppingColumn);
+                auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
+                col->add(window);
+                workspaceData->fitCol(col);
+            }
             workspaceData->fitCol(droppingColumn);
         } else {
             auto idx = workspaceData->idx(droppingColumn);
@@ -640,9 +670,9 @@ void CScrollingLayout::resizeActiveWindow(const Vector2D& delta, eRectCorner cor
     const auto DATA = dataFor(PWINDOW);
 
     if (!DATA) {
-        *PWINDOW->m_realSize =
-            (PWINDOW->m_realSize->goal() + delta)
-                .clamp(PWINDOW->m_ruleApplicator->minSize().valueOr(Vector2D{MIN_WINDOW_SIZE, MIN_WINDOW_SIZE}), PWINDOW->m_ruleApplicator->maxSize().valueOr(Vector2D{INFINITY, INFINITY}));
+        *PWINDOW->m_realSize = (PWINDOW->m_realSize->goal() + delta)
+                                   .clamp(PWINDOW->m_ruleApplicator->minSize().valueOr(Vector2D{MIN_WINDOW_SIZE, MIN_WINDOW_SIZE}),
+                                          PWINDOW->m_ruleApplicator->maxSize().valueOr(Vector2D{INFINITY, INFINITY}));
         PWINDOW->updateWindowDecos();
         return;
     }
@@ -982,7 +1012,12 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
 
             const auto USABLE = usableAreaFor(WORKDATA->workspace->m_monitor.lock());
 
-            WDATA->column->columnWidth = 1.F;
+            WDATA->column->lastColumnWidth = WDATA->column->columnWidth;
+            if (WDATA->column->columnWidth == 1.F) {
+                WDATA->column->columnWidth = WDATA->column->lastColumnWidth;
+            } else {
+                WDATA->column->columnWidth = 1.F;
+            }
 
             WORKDATA->leftOffset = 0;
             for (size_t i = 0; i < WORKDATA->columns.size(); ++i) {
@@ -1007,7 +1042,8 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
 
             WDATA->recalculate();
         } else if (ARGS[1] == "toend") {
-            // fit all columns on screen that start from the current and end on the last
+            // fit all columns on screen that start from the current and end on the
+            // last
             const auto WDATA = dataFor(Desktop::focusState()->window()->m_workspace);
 
             if (!WDATA || WDATA->columns.size() == 0)
@@ -1039,7 +1075,8 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
 
             WDATA->recalculate();
         } else if (ARGS[1] == "tobeg") {
-            // fit all columns on screen that start from the current and end on the last
+            // fit all columns on screen that start from the current and end on the
+            // last
             const auto WDATA = dataFor(Desktop::focusState()->window()->m_workspace);
 
             if (!WDATA || WDATA->columns.size() == 0)
@@ -1066,7 +1103,8 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
 
             WDATA->recalculate();
         } else if (ARGS[1] == "visible") {
-            // fit all columns on screen that start from the current and end on the last
+            // fit all columns on screen that start from the current and end on the
+            // last
             const auto WDATA = dataFor(Desktop::focusState()->window()->m_workspace);
 
             if (!WDATA || WDATA->columns.size() == 0)
@@ -1233,9 +1271,9 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
         int64_t            target_idx = -1;
 
         if (direction == "l")
-            target_idx = (current_idx == 0) ? (col_count - 1) : (current_idx - 1);
+            target_idx = (current_idx == 0) ? current_idx : (current_idx - 1);
         else if (direction == "r")
-            target_idx = (current_idx == (int64_t)col_count - 1) ? 0 : (current_idx + 1);
+            target_idx = (current_idx == (int64_t)col_count - 1) ? current_idx : (current_idx + 1);
         else
             return {};
 
@@ -1439,13 +1477,12 @@ void CScrollingLayout::moveWindowTo(PHLWINDOW w, const std::string& dir, bool si
     if (dir == "l") {
         const auto COL = WS->prev(DATA->column.lock());
 
-        DATA->column->remove(w);
-
         if (!COL) {
-            const auto NEWCOL = WS->add(-1);
-            NEWCOL->add(DATA);
-            WS->centerOrFitCol(NEWCOL);
+            // const auto NEWCOL = WS->add(-1);
+            // NEWCOL->add(DATA);
+            // WS->centerOrFitCol(NEWCOL);
         } else {
+            DATA->column->remove(w);
             if (COL->windowDatas.size() > 0)
                 COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
             else
@@ -1455,14 +1492,13 @@ void CScrollingLayout::moveWindowTo(PHLWINDOW w, const std::string& dir, bool si
     } else if (dir == "r") {
         const auto COL = WS->next(DATA->column.lock());
 
-        DATA->column->remove(w);
-
         if (!COL) {
             // make a new one
-            const auto NEWCOL = WS->add();
-            NEWCOL->add(DATA);
-            WS->centerOrFitCol(NEWCOL);
+            // const auto NEWCOL = WS->add();
+            // NEWCOL->add(DATA);
+            // WS->centerOrFitCol(NEWCOL);
         } else {
+            DATA->column->remove(w);
             if (COL->windowDatas.size() > 0)
                 COL->add(DATA, COL->idxForHeight(g_pInputManager->getMouseCoordsInternal().y));
             else
