@@ -584,8 +584,8 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                     // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
                     const auto LEFT = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().middle().x > mouseX;
                     // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
-                    auto col = LEFT ? (IDX == 0 ? workspaceData->add() : workspaceData->add(IDX - 1)) : workspaceData->add(IDX);
-
+                    auto col = LEFT ? (IDX == 0 ? workspaceData->add() : workspaceData->add(IDX)) : workspaceData->add(IDX - 1);
+                    Debug::log(LOG, "left {} idx {}", LEFT,IDX);
                     col->add(window);
                     workspaceData->fitCol(col);
                 }
