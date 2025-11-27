@@ -222,7 +222,7 @@ void SWorkspaceData::centerCol(SP<SColumnData> c) {
 }
 
 void SWorkspaceData::fitCol(SP<SColumnData> c) {
-    if (!c)
+    if (!c || visible(c))
         return;
 
     static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:fullscreen_on_one_column");
@@ -548,8 +548,25 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                workspaceData->columns.size());
 
     if (!droppingColumn) {
-        auto col = workspaceData->add();
+
+        SP<SColumnData> col;
+        if (workspaceData->columns.size() > 0) {
+            auto      lastColumn = workspaceData->columns.back();
+            const int mouseX     = g_pInputManager->getMouseCoordsInternal().x;
+            auto      lastColX   = lastColumn->windowDatas.back()->window->m_realPosition->value().x;
+            bool      isLeft     = mouseX < lastColX;
+
+            auto      idx = workspaceData->idx(lastColumn);
+            col = isLeft ? workspaceData->add(idx - 1) : workspaceData->add(idx);
+        } else {
+            col = workspaceData->add();
+        }
         col->add(window);
+        float width = getLastRemovedColumnWidth();
+        if (width != 0.0) {
+            col->columnWidth     = getLastRemovedColumnWidth();
+            col->lastColumnWidth = getLastRemovedColumnLastWidth();
+        }
         workspaceData->fitCol(col);
     } else {
         if (window->m_draggingTiled) {
@@ -598,10 +615,16 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 }
             } else {
                 // 如果没有目标窗口，直接将窗口添加到新的列
-                auto idx = workspaceData->idx(droppingColumn);
-                auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
+                auto            idx = workspaceData->idx(droppingColumn);
+                SP<SColumnData> col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
+
                 // window->
                 col->add(window);
+                float width = getLastRemovedColumnWidth();
+                if (width != 0.0) {
+                    col->columnWidth     = getLastRemovedColumnWidth();
+                    col->lastColumnWidth = getLastRemovedColumnLastWidth();
+                }
                 workspaceData->fitCol(col);
             }
             // workspaceData->fitCol(droppingColumn);
@@ -626,11 +649,11 @@ void CScrollingLayout::onWindowRemovedTiling(PHLWINDOW window) {
     // Debug::log(LOG, "removed column {}", DATA->column.lock()->columnWidth);
     const auto WS = DATA->column->workspace.lock();
 
-    if (!WS->next(DATA->column.lock())) {
-        // move the view if this is the last column
-        const auto USABLE = usableAreaFor(window->m_monitor.lock());
-        WS->leftOffset -= USABLE.w * DATA->column->columnWidth;
-    }
+    // if (!WS->next(DATA->column.lock())) {
+    //     // move the view if this is the last column
+    //     const auto USABLE = usableAreaFor(window->m_monitor.lock());
+    //     WS->leftOffset -= USABLE.w * DATA->column->columnWidth;
+    // }
 
     DATA->column->remove(window);
 
