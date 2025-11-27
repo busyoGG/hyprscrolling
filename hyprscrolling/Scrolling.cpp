@@ -572,6 +572,8 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 // 判断鼠标是否在中间 60% 区域内
                 bool isInMiddle60Percent = (mouseX >= leftLimit && mouseX <= rightLimit);
 
+                Debug::log(LOG, "posX {} leftLimit {} rightLimit {} mouseX {}", posX, leftLimit, rightLimit, mouseX);
+
                 if (isInMiddle60Percent) {
                     // 如果鼠标在中间 60% 区域内，按照原来方式放置窗口
                     const auto TOP = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().middle().y > mouseY;
