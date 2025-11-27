@@ -74,6 +74,7 @@ struct SWorkspaceData {
     SP<SColumnData>              atCenter();
 
     bool                         visible(SP<SColumnData> c);
+    bool                         visibleAndLeftAligned(SP<SColumnData> c);
     void                         centerCol(SP<SColumnData> c);
     void                         fitCol(SP<SColumnData> c);
     void                         centerOrFitCol(SP<SColumnData> c);

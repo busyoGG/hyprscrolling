@@ -222,7 +222,8 @@ void SWorkspaceData::centerCol(SP<SColumnData> c) {
 }
 
 void SWorkspaceData::fitCol(SP<SColumnData> c) {
-    if (!c || visible(c))
+    // bool leftAligned = c
+    if (!c || visibleAndLeftAligned(c))
         return;
 
     static const auto PFSONONE = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:fullscreen_on_one_column");
@@ -337,6 +338,24 @@ bool SWorkspaceData::visible(SP<SColumnData> c) {
             const float viewLeft  = leftOffset;
             const float viewRight = leftOffset + USABLE.w;
             return colLeft < viewRight && viewLeft < colRight;
+        }
+
+        totalLeft += col->columnWidth * USABLE.w;
+    }
+
+    return false;
+}
+
+bool SWorkspaceData::visibleAndLeftAligned(SP<SColumnData> c) {
+    const auto USABLE    = layout->usableAreaFor(workspace->m_monitor.lock());
+    float      totalLeft = 0;
+    for (const auto& col : columns) {
+        if (col == c) {
+            const float colLeft   = totalLeft;
+            const float colRight  = totalLeft + col->columnWidth * USABLE.w;
+            const float viewLeft  = leftOffset;
+            const float viewRight = leftOffset + USABLE.w;
+            return colLeft < viewRight && viewLeft < colRight && colLeft == viewLeft;
         }
 
         totalLeft += col->columnWidth * USABLE.w;
@@ -557,7 +576,7 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
             bool      isLeft     = mouseX < lastColX;
 
             auto      idx = workspaceData->idx(lastColumn);
-            col = isLeft ? workspaceData->add(idx - 1) : workspaceData->add(idx);
+            col           = isLeft ? workspaceData->add(idx - 1) : workspaceData->add(idx);
         } else {
             col = workspaceData->add();
         }
