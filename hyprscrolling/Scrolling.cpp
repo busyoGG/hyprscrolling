@@ -558,14 +558,16 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 // 获取目标窗口在列中的索引
 
                 // 获取目标列的宽度
-                const auto columnWidth = droppingColumn->getWidth();
+                const auto columnWidth = droppingColumn->columnWidth;
 
                 // 获取鼠标的水平位置
                 const int mouseX = g_pInputManager->getMouseCoordsInternal().x;
+                const int mouseY = g_pInputManager->getMouseCoordsInternal().y;
 
                 // 计算列的中间 60% 区域的范围
-                const int leftLimit  = droppingColumn->getX() + columnWidth * 0.20;
-                const int rightLimit = droppingColumn->getX() + columnWidth * 0.80;
+                int posX = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().pos().x;
+                const int leftLimit  = posX + columnWidth * 0.20;
+                const int rightLimit = posX + columnWidth * 0.80;
 
                 // 判断鼠标是否在中间 60% 区域内
                 bool isInMiddle60Percent = (mouseX >= leftLimit && mouseX <= rightLimit);
