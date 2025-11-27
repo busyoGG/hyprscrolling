@@ -47,6 +47,7 @@ struct SColumnData {
   std::vector<SP<SScrollingWindowData>> windowDatas;
   float columnSize = 1.F;
   float columnWidth = 1.F;
+  float lastColumnSize = 1.F;
   WP<SWorkspaceData> workspace;
   WP<SScrollingWindowData> lastFocusedWindow;
 

@@ -1,52 +1,112 @@
-# hyprscrolling
+# hyprland-plugins
 
-Adds a scrolling layout to Hyprland.
+This repo houses official plugins for Hyprland.
 
-**This plugin is a work in progress!**
+# Plugin list
+ - borders-plus-plus -> adds one or two additional borders to windows
+ - csgo-vulkan-fix -> fixes custom resolutions on CS:GO with `-vulkan`
+ - hyprbars -> adds title bars to windows
+ - hyprexpo -> adds an expo-like workspace overview
+ - hyprfocus -> flashfocus for hyprland
+ - hyprscrolling -> adds a scrolling layout to hyprland
+ - hyprtrails -> adds smooth trails behind moving windows
+ - hyprwinwrap -> clone of xwinwrap, allows you to put any app as a wallpaper
+ - xtra-dispatchers -> adds some new dispatchers
 
-## Config
+# Install
+> [!IMPORTANT]
+> hyprland-plugins only officially supports installation via `hyprpm`.
+> `hyprpm` automatically detects your hyprland version & installs only
+> the corresponding "pinned" release of hyprland-plugins.
+> If you want the latest commits to hyprland-plugins, you need to use
+> `hyprland-git`.
 
-Make sure to set the `general:layout` to `scrolling` to use this layout.
+## Install with `hyprpm`
 
-All config values can be set in your Hyprland config file, for example:
+To install these plugins, from the command line run:
+```bash
+hyprpm update
 ```
-plugin {
-    hyprscrolling {
-        column_width = 0.7
-        fullscreen_on_one_column = false
-    }
+Then add this repository:
+```bash
+hyprpm add https://github.com/hyprwm/hyprland-plugins
+```
+then enable the desired plugin with
+```bash
+hyprpm enable <plugin-name>
+```
+
+See the respective README's in the subdirectories for configuration options.
+
+See [the plugins wiki](https://wiki.hyprland.org/Plugins/Using-Plugins/#installing--using-plugins) and `hyprpm -h` for more details.
+
+## Install on Nix
+
+To use these plugins, it's recommended that you are already using the
+[Hyprland flake](https://github.com/hyprwm/Hyprland).
+First, add this flake to your inputs:
+
+```nix
+inputs = {
+  # ...
+  hyprland.url = "github:hyprwm/Hyprland";
+  hyprland-plugins = {
+    url = "github:hyprwm/hyprland-plugins";
+    inputs.hyprland.follows = "hyprland";
+  };
+
+  # ...
+};
+```
+
+The `inputs.hyprland.follows` guarantees the plugins will always be built using
+your locked Hyprland version, thus you will never get version mismatches that
+lead to errors.
+
+After that's done, you can use the plugins with the Home Manager module like
+this:
+
+```nix
+{inputs, pkgs, ...}: {
+  wayland.windowManager.hyprland = {
+    enable = true;
+    # ...
+    plugins = [
+      inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
+      # ...
+    ];
+  };
 }
 ```
 
-| name | description | type | default |
-| -- | -- | -- | -- |
-| fullscreen_on_one_column | if there's only one column, should it be fullscreen | bool | false |
-| column_width | default column width as a fraction of the monitor width | float [0 - 1] | 0.5 |
-| explicit_column_widths | a comma-separated list of widths for columns to be used with `+conf` or `-conf` | string | `0.333, 0.5, 0.667, 1.0` |
-| focus_fit_method | when a column is focused, what method to use to bring it into view. 0 - center, 1 - fit | int | 0 |
-| follow_focus | when a window is focused, the layout will move to make it visible | bool | true |
+If you don't use Home Manager:
 
-
-## Layout messages
-
-| name | description | params |
-| --- | --- | --- |
-| move | move the layout horizontally, by either a relative logical px (`-200`, `+200`) or columns (`+col`, `-col`) | move data |
-| colresize | resize the current column, to either a value or by a relative value e.g. `0.5`, `+0.2`, `-0.2` or cycle the preconfigured ones with `+conf` or `-conf`. Can also be `all (number)` for resizing all columns to a specific width | relative float / relative conf |
-| movewindowto | same as the movewindow dispatcher but supports promotion to the right at the end | direction |
-| fit | executes a fit operation based on the argument. Available: `active`, `visible`, `all`, `toend`, `tobeg` | fit mode |
-| focus | moves the focus and centers the layout, while also wrapping instead of moving to neighbring monitors. | direction |
-| promote | moves a window to its own new column | none |
-| swapcol | Swaps the current column with its neighbor to the left (`l`) or right (`r`). The swap wraps around (e.g., swapping the first column left moves it to the end). | `l` or `r` |
-| movecoltoworkspace | Moves the entire current column to the specified workspace, preserving its internal layout. Works with existing, new, and special workspaces. e.g. like `1`, `2`, `-1`, `+2`, `special`, etc. | workspace identifier|
-| togglefit | Toggle the focus_fit_method (center, fit) | none |
-
-Example key bindings for your Hyprland config:
+```nix
+{ lib, pkgs, inputs, ... }:
+with lib; let
+  hyprPluginPkgs = inputs.hyprland-plugins.packages.${pkgs.system};
+  hypr-plugin-dir = pkgs.symlinkJoin {
+    name = "hyrpland-plugins";
+    paths = with hyprPluginPkgs; [
+      hyprexpo
+      #...plugins
+    ];
+  };
+in
+{
+  environment.sessionVariables = { HYPR_PLUGIN_DIR = hypr-plugin-dir; };
+}
 ```
-bind = $mainMod, period, layoutmsg, move +col
-bind = $mainMod, comma, layoutmsg, move -col
-bind = $mainMod SHIFT, period, layoutmsg, movewindowto r
-bind = $mainMod SHIFT, comma, layoutmsg, movewindowto l
-bind = $mainMod SHIFT, up, layoutmsg, movewindowto u
-bind = $mainMod SHIFT, down, layoutmsg, movewindowto d
+
+And in `hyprland.conf`
+
+```hyprlang
+# load all the plugins you installed
+exec-once = hyprctl plugin load "$HYPR_PLUGIN_DIR/lib/libhyprexpo.so"
 ```
+
+# Contributing
+
+Feel free to open issues and MRs with fixes.
+
+If you want your plugin added here, contact vaxry beforehand.
