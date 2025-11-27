@@ -114,6 +114,9 @@ class CScrollingLayout : public IHyprLayout {
 
     SP<HOOK_CALLBACK_FN>            m_configCallback;
     SP<HOOK_CALLBACK_FN>            m_focusCallback;
+    SP<HOOK_CALLBACK_FN>            m_pointerButtonHook;
+
+    PHLWINDOW                       currentActiveWindow = nullptr;
 
     float                           m_lastRemovedColumnWidth;
     float                           m_lastRemovedColumnLastWidth;

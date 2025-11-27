@@ -239,6 +239,7 @@ void SWorkspaceData::fitCol(SP<SColumnData> c) {
             currentLeft += ITEM_WIDTH;
         else {
             leftOffset = std::clamp((double)leftOffset, currentLeft - USABLE.w + ITEM_WIDTH, currentLeft);
+            Debug::log(LOG, "update left offset {}", leftOffset);
             return;
         }
     }
@@ -512,16 +513,34 @@ void CScrollingLayout::onEnable() {
         if (!PWINDOW)
             return;
 
+        currentActiveWindow = PWINDOW;
+
         static const auto PFOLLOW_FOCUS = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:follow_focus");
 
-        if (!*PFOLLOW_FOCUS)
+        // Debug::log(LOG, "scrolling: active window isClicked {}", isClicked);
+        if (!*PFOLLOW_FOCUS) {
             return;
+        }
 
         if (!PWINDOW->m_workspace->isVisible())
             return;
 
         const auto DATA       = dataFor(PWINDOW->m_workspace);
         const auto WINDOWDATA = dataFor(PWINDOW);
+
+        if (!DATA || !WINDOWDATA)
+            return;
+
+        DATA->fitCol(WINDOWDATA->column.lock());
+        DATA->recalculate();
+    });
+
+    m_pointerButtonHook = g_pHookSystem->hookDynamic("mouseButton", [this](void* hk, SCallbackInfo& info, std::any param) {
+        if (!currentActiveWindow) {
+            return;
+        }
+        const auto DATA       = dataFor(currentActiveWindow->m_workspace);
+        const auto WINDOWDATA = dataFor(currentActiveWindow);
 
         if (!DATA || !WINDOWDATA)
             return;
@@ -721,7 +740,6 @@ void CScrollingLayout::onBeginDragWindow() {
 }
 
 void CScrollingLayout::resizeActiveWindow(const Vector2D& delta, eRectCorner corner, PHLWINDOW pWindow) {
-    Debug::log(LOG, "resizeActiveWindow");
     const auto PWINDOW  = pWindow ? pWindow : Desktop::focusState()->window();
     Vector2D   modDelta = delta;
 
