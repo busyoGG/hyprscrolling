@@ -570,8 +570,8 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 const int rightLimit = posX + columnWidth * 0.70;
 
                 // 判断鼠标是否在中间 60% 区域内
-                bool isLeft = (mouseX < leftLimit);
-                bool isRight = (mouseX > rightLimit);
+                bool isLeft              = (mouseX < leftLimit);
+                bool isRight             = (mouseX > rightLimit);
                 bool isInMiddle60Percent = !isLeft && !isRight;
 
                 // Debug::log(LOG, "posX {} leftLimit {} rightLimit {} mouseX {}", posX, leftLimit, rightLimit, mouseX);
@@ -1289,7 +1289,7 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
             }
         } else if (direction == "r") {
             // target_idx = (current_idx == (int64_t)col_count - 1) ? current_idx : (current_idx + 1);
-            if (current_idx == (int64_t)col_count - 1) {
+            if (current_idx != (int64_t)col_count - 1) {
                 target_idx = current_idx + 1;
                 std::swap(WS_DATA->columns[current_idx], WS_DATA->columns[target_idx]);
                 WS_DATA->centerOrFitCol(CURRENT_COL);
