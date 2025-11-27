@@ -565,7 +565,7 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 const int mouseY = g_pInputManager->getMouseCoordsInternal().y;
 
                 // 计算列的中间 60% 区域的范围
-                int       posX       = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().pos().x;
+                int       posX       = droppingOn->m_position.x;
                 const int leftLimit  = posX + columnWidth * 0.20;
                 const int rightLimit = posX + columnWidth * 0.80;
 
@@ -1272,16 +1272,25 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
         const std::string& direction  = ARGS[1];
         int64_t            target_idx = -1;
 
-        if (direction == "l")
-            target_idx = (current_idx == 0) ? current_idx : (current_idx - 1);
-        else if (direction == "r")
-            target_idx = (current_idx == (int64_t)col_count - 1) ? (current_idx - 1) : (current_idx + 1);
-        else
+        if (direction == "l") {
+            // target_idx = (current_idx == 0) ? current_idx : (current_idx - 1);
+            if (current_idx != 0) {
+                target_idx = current_idx - 1;
+                std::swap(WS_DATA->columns[current_idx], WS_DATA->columns[target_idx]);
+                WS_DATA->centerOrFitCol(CURRENT_COL);
+                WS_DATA->recalculate();
+            }
+        } else if (direction == "r") {
+            // target_idx = (current_idx == (int64_t)col_count - 1) ? current_idx : (current_idx + 1);
+            if (current_idx == (int64_t)col_count - 1) {
+                target_idx = current_idx + 1;
+                std::swap(WS_DATA->columns[current_idx], WS_DATA->columns[target_idx]);
+                WS_DATA->centerOrFitCol(CURRENT_COL);
+                WS_DATA->recalculate();
+            }
+        } else {
             return {};
-
-        std::swap(WS_DATA->columns[current_idx], WS_DATA->columns[target_idx]);
-        WS_DATA->centerOrFitCol(CURRENT_COL);
-        WS_DATA->recalculate();
+        }
     } else if (ARGS[0] == "movecoltoworkspace") {
         if (ARGS.size() < 2)
             return {};
