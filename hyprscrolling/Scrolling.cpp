@@ -565,12 +565,14 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                 const int mouseY = g_pInputManager->getMouseCoordsInternal().y;
 
                 // 计算列的中间 60% 区域的范围
-                int       posX       = droppingOn->m_position.x;
-                const int leftLimit  = posX + columnWidth * 0.20;
-                const int rightLimit = posX + columnWidth * 0.80;
+                int       posX       = droppingOn->m_realPosition->value().x;
+                const int leftLimit  = posX + columnWidth * 0.30;
+                const int rightLimit = posX + columnWidth * 0.70;
 
                 // 判断鼠标是否在中间 60% 区域内
-                bool isInMiddle60Percent = (mouseX >= leftLimit && mouseX <= rightLimit);
+                bool isLeft = (mouseX < leftLimit);
+                bool isRight = (mouseX > rightLimit);
+                bool isInMiddle60Percent = !isLeft && !isRight;
 
                 // Debug::log(LOG, "posX {} leftLimit {} rightLimit {} mouseX {}", posX, leftLimit, rightLimit, mouseX);
 
@@ -582,10 +584,9 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
                     // 否则，创建一个新列并放置窗口
                     auto idx = workspaceData->idx(droppingColumn);
                     // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
-                    const auto LEFT = droppingOn->getWindowIdealBoundingBoxIgnoreReserved().middle().x > mouseX;
                     // auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
-                    auto col = LEFT ? (IDX == 0 ? workspaceData->add() : workspaceData->add(IDX)) : workspaceData->add(IDX - 1);
-                    Debug::log(LOG, "left {} idx {}", LEFT,IDX);
+                    auto col = isLeft ? workspaceData->add(idx - 1) : workspaceData->add(idx);
+                    // Debug::log(LOG, "left {} idx {}", isLeft, idx);
                     col->add(window);
                     workspaceData->fitCol(col);
                 }
