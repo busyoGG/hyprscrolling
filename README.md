@@ -1,17 +1,9 @@
 # hyprland-plugins
 
-This repo houses official plugins for Hyprland.
+This repo houses unofficial plugins for Hyprland.
 
 # Plugin list
- - borders-plus-plus -> adds one or two additional borders to windows
- - csgo-vulkan-fix -> fixes custom resolutions on CS:GO with `-vulkan`
- - hyprbars -> adds title bars to windows
- - hyprexpo -> adds an expo-like workspace overview
- - hyprfocus -> flashfocus for hyprland
  - hyprscrolling -> adds a scrolling layout to hyprland
- - hyprtrails -> adds smooth trails behind moving windows
- - hyprwinwrap -> clone of xwinwrap, allows you to put any app as a wallpaper
- - xtra-dispatchers -> adds some new dispatchers
 
 # Install
 > [!IMPORTANT]
@@ -29,7 +21,7 @@ hyprpm update
 ```
 Then add this repository:
 ```bash
-hyprpm add https://github.com/hyprwm/hyprland-plugins
+hyprpm add https://github.com/busyoGG/hyprscrolling.git
 ```
 then enable the desired plugin with
 ```bash
@@ -51,7 +43,7 @@ inputs = {
   # ...
   hyprland.url = "github:hyprwm/Hyprland";
   hyprland-plugins = {
-    url = "github:hyprwm/hyprland-plugins";
+    url = "github:busyoGG/hyprscrolling";
     inputs.hyprland.follows = "hyprland";
   };
 
