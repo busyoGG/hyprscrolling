@@ -495,6 +495,8 @@ void CScrollingLayout::applyNodeDataToWindow(SP<SScrollingWindowData> data, bool
 void CScrollingLayout::onEnable() {
     static const auto PCONFWIDTHS = CConfigValue<Hyprlang::STRING>("plugin:hyprscrolling-mod:explicit_column_widths");
 
+    m_wsID = g_pCompositor->getWorkspacesCopy().size();
+
     m_configCallback = g_pHookSystem->hookDynamic("configReloaded", [this](void* hk, SCallbackInfo& info, std::any param) {
         // bitch ass
         m_config.configuredWidths.clear();
@@ -1107,6 +1109,34 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
             }
 
             WDATA->column->workspace->recalculate();
+        } else if (ARGS[1] == "active_fit") {
+            if (ARGS[1] == "active_full") {
+                // fit the current column to 1.F
+                const auto WDATA    = dataFor(Desktop::focusState()->window());
+                const auto WORKDATA = dataFor(Desktop::focusState()->window()->m_workspace);
+
+                if (!WDATA || !WORKDATA || WORKDATA->columns.size() == 0)
+                    return {};
+
+                const auto USABLE = usableAreaFor(WORKDATA->workspace->m_monitor.lock());
+
+                if (WDATA->column->columnWidth == 1.F) {
+                    WDATA->column->columnWidth = WDATA->column->lastColumnWidth;
+                } else {
+                    WDATA->column->lastColumnWidth = WDATA->column->columnWidth;
+                    WDATA->column->columnWidth     = 1.F;
+                }
+
+                WORKDATA->leftOffset = 0;
+                for (size_t i = 0; i < WORKDATA->columns.size(); ++i) {
+                    if (WORKDATA->columns[i]->has(Desktop::focusState()->window()))
+                        break;
+
+                    WORKDATA->leftOffset += USABLE.w * WORKDATA->columns[i]->columnWidth;
+                }
+
+                WDATA->column->workspace->recalculate();
+            }
         } else if (ARGS[1] == "all") {
             // fit all columns on screen
             const auto WDATA = dataFor(Desktop::focusState()->window()->m_workspace);
@@ -1528,6 +1558,199 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
             }
 
             ws->recalculate();
+        }
+    } else if (ARGS[0] == "workspace_focus") {
+        switch (ARGS[1][0]) {
+            case 'n': {
+                auto monitor   = Desktop::focusState()->monitor();
+                auto currentWS = Desktop::focusState()->monitor()->m_activeWorkspace;
+
+                bool hasNext    = false;
+                int  nextWSID   = -1;
+                auto workspaces = g_pCompositor->getWorkspacesCopy();
+
+                if (workspaces.size() == 0) {
+                    return {};
+                }
+
+                bool need_break = false;
+                for (int i = 0; i < workspaces.size(); ++i) {
+                    if (workspaces[i]->m_monitor == monitor) {
+
+                        if (need_break) {
+                            hasNext  = true;
+                            nextWSID = workspaces[i]->m_id;
+                            break;
+                        }
+
+                        if (workspaces[i]->m_id == currentWS->m_id) {
+                            need_break = true;
+                        }
+                    }
+                }
+
+                if (nextWSID == -1) {
+                    nextWSID = currentWS->m_id;
+                }
+
+                if (hasNext) {
+                    Desktop::focusState()->monitor()->changeWorkspace(nextWSID);
+                } else {
+                    // Debug::log(LOG, "currentWS->getWindows() {}", currentWS->getWindows());
+                    if (currentWS->getWindows() > 0) {
+                        const auto MONITORID   = monitor->m_id;
+                        const auto WORKSPACEID = ++m_wsID;
+                        auto       res         = g_pCompositor->createNewWorkspace(WORKSPACEID, MONITORID);
+
+                        Desktop::focusState()->monitor()->changeWorkspace(res->m_id);
+                    }
+                }
+
+                break;
+            }
+            case 'p': {
+                auto monitor   = Desktop::focusState()->monitor();
+                auto currentWS = Desktop::focusState()->monitor()->m_activeWorkspace;
+
+                auto workspaces = g_pCompositor->getWorkspacesCopy();
+                if (workspaces.size() == 0) {
+                    return {};
+                }
+
+                bool hasPrev  = false;
+                int  prevWSID = -1;
+
+                bool need_break = false;
+                for (int i = workspaces.size() - 1; i >= 0; --i) {
+                    if (workspaces[i]->m_monitor == monitor) {
+
+                        if (need_break) {
+                            hasPrev  = true;
+                            prevWSID = workspaces[i]->m_id;
+                            break;
+                        }
+
+                        if (workspaces[i]->m_id == currentWS->m_id) {
+                            need_break = true;
+                        }
+                    }
+                }
+
+                if (prevWSID == -1) {
+                    prevWSID = currentWS->m_id;
+                }
+
+                if (hasPrev) {
+                    Desktop::focusState()->monitor()->changeWorkspace(prevWSID);
+                } else {
+                    // if (currentWS->getWindows() > 0) {
+                    //     const auto MONITORID   = monitor->m_id;
+                    //     const auto WORKSPACEID = findId();
+                    //     auto       res         = g_pCompositor->createNewWorkspace(WORKSPACEID, MONITORID);
+                    // }
+                }
+
+                break;
+            }
+        }
+    } else if (ARGS[0] == "movecoltows") {
+        switch (ARGS[1][0]) {
+            case 'n': {
+                auto monitor   = Desktop::focusState()->monitor();
+                auto currentWS = Desktop::focusState()->monitor()->m_activeWorkspace;
+
+                bool hasNext    = false;
+                int  nextWSID   = -1;
+                auto workspaces = g_pCompositor->getWorkspacesCopy();
+
+                if (workspaces.size() == 0) {
+                    return {};
+                }
+
+                bool need_break = false;
+                for (int i = 0; i < workspaces.size(); ++i) {
+                    if (workspaces[i]->m_monitor == monitor) {
+
+                        if (need_break) {
+                            hasNext  = true;
+                            nextWSID = workspaces[i]->m_id;
+                            break;
+                        }
+
+                        if (workspaces[i]->m_id == currentWS->m_id) {
+                            need_break = true;
+                        }
+                    }
+                }
+
+                if (nextWSID == -1) {
+                    nextWSID = currentWS->m_id;
+                }
+
+                if (hasNext) {
+                    auto workspace = g_pCompositor->getWorkspaceByID(nextWSID);
+                    g_pCompositor->moveWindowToWorkspaceSafe(currentActiveWindow, workspace);
+                    Desktop::focusState()->monitor()->changeWorkspace(nextWSID);
+                } else {
+                    // Debug::log(LOG, "currentWS->getWindows() {}", currentWS->getWindows());
+                    if (currentWS->getWindows() > 1) {
+                        const auto MONITORID   = monitor->m_id;
+                        const auto WORKSPACEID = ++m_wsID;
+                        auto       workspace   = g_pCompositor->createNewWorkspace(WORKSPACEID, MONITORID);
+
+                        g_pCompositor->moveWindowToWorkspaceSafe(currentActiveWindow, workspace);
+                        Desktop::focusState()->monitor()->changeWorkspace(workspace->m_id);
+                    }
+                }
+
+                break;
+            }
+            case 'p': {
+                auto monitor   = Desktop::focusState()->monitor();
+                auto currentWS = Desktop::focusState()->monitor()->m_activeWorkspace;
+
+                auto workspaces = g_pCompositor->getWorkspacesCopy();
+                if (workspaces.size() == 0) {
+                    return {};
+                }
+
+                bool hasPrev  = false;
+                int  prevWSID = -1;
+
+                bool need_break = false;
+                for (int i = workspaces.size() - 1; i >= 0; --i) {
+                    if (workspaces[i]->m_monitor == monitor) {
+
+                        if (need_break) {
+                            hasPrev  = true;
+                            prevWSID = workspaces[i]->m_id;
+                            break;
+                        }
+
+                        if (workspaces[i]->m_id == currentWS->m_id) {
+                            need_break = true;
+                        }
+                    }
+                }
+
+                if (prevWSID == -1) {
+                    prevWSID = currentWS->m_id;
+                }
+
+                if (hasPrev) {
+                    auto workspace = g_pCompositor->getWorkspaceByID(prevWSID);
+                    g_pCompositor->moveWindowToWorkspaceSafe(currentActiveWindow, workspace);
+                    Desktop::focusState()->monitor()->changeWorkspace(prevWSID);
+                } else {
+                    // if (currentWS->getWindows() > 0) {
+                    //     const auto MONITORID   = monitor->m_id;
+                    //     const auto WORKSPACEID = findId();
+                    //     auto       res         = g_pCompositor->createNewWorkspace(WORKSPACEID, MONITORID);
+                    // }
+                }
+
+                break;
+            }
         }
     }
     return {};
