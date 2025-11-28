@@ -29,19 +29,19 @@ plugin {
 
 ## Layout messages
 
-|        name         |                                                                                                           description                                                                                                           | params |
-|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
-|        move         |                                                           move the layout horizontally, by either a relative logical px (`-200`, `+200`) or columns (`+col`, `-col`)                                                            | move data |
-|      colresize      | resize the current column, to either a value or by a relative value e.g. `0.5`, `+0.2`, `-0.2` or cycle the preconfigured ones with `+conf` or `-conf`. Can also be `all (number)` for resizing all columns to a specific width | relative float / relative conf |
-|    movewindowto     |                                                                        same as the movewindow dispatcher but supports promotion to the right at the end                                                                         | direction |
-|       **fit**       |                                                           executes a fit operation based on the argument. Available: **`active`**, `visible`, `all`, `toend`, `tobeg`                                                           | fit mode |
-|        focus        |                                                              moves the focus and centers the layout, while also wrapping instead of moving to neighbring monitors.                                                              | direction |
-|       promote       |                                                                                              moves a window to its own new column                                                                                               |  none  |
-|     **swapcol**     |                                                                         Swaps the current column with its neighbor to the left (`l`) or right (`r`). .                                                                          | `l` or `r` |
-| movecoltoworkspace  |                  Moves the entire current column to the specified workspace, preserving its internal layout. Works with existing, new, and special workspaces. e.g. like `1`, `2`, `-1`, `+2`, `special`, etc.                  | workspace identifier |
-|      togglefit      |                                                                                            Toggle the focus_fit_method (center, fit)                                                                                            |  none  |
-| **workspace_focus** |                                                                                                         focus workspace                                                                                                         | 'n' for next, 'p' for previous |
-| **move_win_to_ws**  |                                                                                                    moev window to workspace                                                                                                     | 'n' for next, 'p' for previous |
+|        name         |                                                                                                                          description                                                                                                                           | params |
+|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
+|        move         |                                                                           move the layout horizontally, by either a relative logical px (`-200`, `+200`) or columns (`+col`, `-col`)                                                                           | move data |
+|    **colresize**    | resize the current column, to either a value or by a relative value e.g. `0.5`, `+0.2`, `-0.2` or cycle the preconfigured ones with `+conf` or `-conf` or just **'conf'** to recircle. Can also be `all (number)` for resizing all columns to a specific width | relative float / relative conf |
+|    movewindowto     |                                                                                        same as the movewindow dispatcher but supports promotion to the right at the end                                                                                        | direction |
+|       **fit**       |                                                                          executes a fit operation based on the argument. Available: **`active`**, `visible`, `all`, `toend`, `tobeg`                                                                           | fit mode |
+|        focus        |                                                                             moves the focus and centers the layout, while also wrapping instead of moving to neighbring monitors.                                                                              | direction |
+|       promote       |                                                                                                              moves a window to its own new column                                                                                                              |  none  |
+|     **swapcol**     |                                                                                         Swaps the current column with its neighbor to the left (`l`) or right (`r`). .                                                                                         | `l` or `r` |
+| movecoltoworkspace  |                                 Moves the entire current column to the specified workspace, preserving its internal layout. Works with existing, new, and special workspaces. e.g. like `1`, `2`, `-1`, `+2`, `special`, etc.                                  | workspace identifier |
+|      togglefit      |                                                                                                           Toggle the focus_fit_method (center, fit)                                                                                                            |  none  |
+| **workspace_focus** |                                                                                                                        focus workspace                                                                                                                         | 'n' for next, 'p' for previous |
+| **move_win_to_ws**  |                                                                                                                    moev window to workspace                                                                                                                    | 'n' for next, 'p' for previous |
 
 Example key bindings for your Hyprland config:
 ```
@@ -62,11 +62,14 @@ input {
     mouse_refocus=0 # highly recommended to keep this false,it will not focus the window behind mouse
 }
 
+windowrule = match:class vivaldi-stable,plugin:hyprscrolling-mod:column_width 1.0
+
 bind = SUPER, f, layoutmsg,fit active
 bind = SUPER, mouse_up, layoutmsg,focus r
 bind = SUPER, mouse_down, layoutmsg,focus l
 bind = SUPER CTRL,mouse_up, layoutmsg, swapcol r
 bind = SUPER CTRL,mouse_down, layoutmsg, swapcol l
+bind = SUPER, r, layoutmsg, colresize conf
 
 bind = Alt, mouse_up, layoutmsg, workspace_focus n
 bind = Alt, mouse_down, layoutmsg, workspace_focus p
@@ -77,7 +80,7 @@ plugin{
     hyprscrolling-mod{
         fullscreen_on_one_column = true    
         column_width = 0.5
-        explicit_column_widths = 1.0,0.5
+        explicit_column_widths = 0.33, 0.5, 0.66, 1.0
         focus_fit_method = 1
         follow_focus = false  #highly recommended to keep this false,it will keep windows position when switching columns if the window is not fully visible
     }
