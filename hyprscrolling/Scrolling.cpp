@@ -539,6 +539,7 @@ void CScrollingLayout::onEnable() {
     });
 
     m_pointerButtonHook = g_pHookSystem->hookDynamic("mouseButton", [this](void* hk, SCallbackInfo& info, std::any param) {
+        mouse_moved = 0;
         if (!currentActiveWindow) {
             return;
         }
@@ -553,7 +554,7 @@ void CScrollingLayout::onEnable() {
     });
 
     g_pHookSystem->hookDynamic("mouseMove", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = 10; });
-    g_pHookSystem->hookDynamic("tick", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = std::max(mouse_moved - 1, 0); });
+    // g_pHookSystem->hookDynamic("tick", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = std::max(mouse_moved - 1, 0); });
 
     for (auto const& w : g_pCompositor->m_windows) {
         if (w->m_isFloating || !w->m_isMapped || w->isHidden())
