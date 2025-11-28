@@ -520,7 +520,6 @@ void CScrollingLayout::onEnable() {
 
         static const auto PFOLLOW_FOCUS = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:follow_focus");
 
-        Debug::log(LOG, "scrolling: active window mouse_moved {}", mouse_moved);
         if (!*PFOLLOW_FOCUS && mouse_moved) {
             return;
         }
@@ -553,7 +552,7 @@ void CScrollingLayout::onEnable() {
         DATA->recalculate();
     });
 
-    g_pHookSystem->hookDynamic("mouseMove", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = true; });
+    m_mouseMoveHook = g_pHookSystem->hookDynamic("mouseMove", [this](void* self, SCallbackInfo& info, std::any e) { mouse_moved = true; });
     // g_pHookSystem->hookDynamic("tick", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = std::max(mouse_moved - 1, 0); });
 
     for (auto const& w : g_pCompositor->m_windows) {

@@ -117,6 +117,7 @@ class CScrollingLayout : public IHyprLayout {
     SP<HOOK_CALLBACK_FN>            m_configCallback;
     SP<HOOK_CALLBACK_FN>            m_focusCallback;
     SP<HOOK_CALLBACK_FN>            m_pointerButtonHook;
+    SP<HOOK_CALLBACK_FN>            m_mouseMoveHook;
 
     PHLWINDOW                       currentActiveWindow = nullptr;
 
@@ -124,7 +125,7 @@ class CScrollingLayout : public IHyprLayout {
     float                           m_lastRemovedColumnLastWidth;
 
     int                             m_wsID      = 0;
-    bool                            mouse_moved = false;
+    bool                            mouse_moved = true;
 
     struct {
         bool isMovingColumn    = false;
