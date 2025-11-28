@@ -1653,7 +1653,7 @@ std::any CScrollingLayout::layoutMessage(SLayoutMessageHeader header, std::strin
                 break;
             }
         }
-    } else if (ARGS[0] == "movecoltows") {
+    } else if (ARGS[0] == "move_win_to_ws") {
         switch (ARGS[1][0]) {
             case 'n': {
                 auto monitor   = Desktop::focusState()->monitor();
