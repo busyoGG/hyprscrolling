@@ -521,7 +521,7 @@ void CScrollingLayout::onEnable() {
         static const auto PFOLLOW_FOCUS = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:follow_focus");
 
         // Debug::log(LOG, "scrolling: active window isClicked {}", isClicked);
-        if (!*PFOLLOW_FOCUS && mouse_moved) {
+        if (!*PFOLLOW_FOCUS && mouse_moved == 0) {
             return;
         }
 
@@ -552,8 +552,8 @@ void CScrollingLayout::onEnable() {
         DATA->recalculate();
     });
 
-    g_pHookSystem->hookDynamic("mouseMove", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = true; });
-    g_pHookSystem->hookDynamic("tick", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = false; });
+    g_pHookSystem->hookDynamic("mouseMove", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = 10; });
+    g_pHookSystem->hookDynamic("tick", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = std::max(mouse_moved - 1, 0); });
 
     for (auto const& w : g_pCompositor->m_windows) {
         if (w->m_isFloating || !w->m_isMapped || w->isHidden())
