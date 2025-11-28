@@ -44,6 +44,9 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 
     g_pScrollingLayout = makeUnique<CScrollingLayout>();
 
+    g_pScrollingLayout->g_col_width_idx = Desktop::Rule::windowEffects()->registerEffect("plugin:hyprscrolling-mod:column_width");
+
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:column_width", Hyprlang::FLOAT{0.5F});
     HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:fullscreen_on_one_column", Hyprlang::INT{0});
     HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:column_width", Hyprlang::FLOAT{0.5F});
     HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprscrolling-mod:focus_fit_method", Hyprlang::INT{0});
@@ -62,6 +65,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 }
 
 APICALL EXPORT void PLUGIN_EXIT() {
+    Desktop::Rule::windowEffects()->unregisterEffect(g_pScrollingLayout->g_col_width_idx);
     HyprlandAPI::removeLayout(PHANDLE, g_pScrollingLayout.get());
     g_pScrollingLayout.reset();
 }

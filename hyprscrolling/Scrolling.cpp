@@ -602,6 +602,8 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
             col = workspaceData->add();
         }
         col->add(window);
+        col->columnWidth = getWindowRuleValue(window, g_col_width_idx, 0.5F);
+
         float width = getLastRemovedColumnWidth();
         if (width != 0.0) {
             col->columnWidth     = getLastRemovedColumnWidth();
@@ -672,6 +674,7 @@ void CScrollingLayout::onWindowCreatedTiling(PHLWINDOW window, eDirection direct
             auto idx = workspaceData->idx(droppingColumn);
             auto col = idx == -1 ? workspaceData->add() : workspaceData->add(idx);
             col->add(window);
+            col->columnWidth = getWindowRuleValue(window, g_col_width_idx, 0.5F);
             workspaceData->fitCol(col);
         }
     }
@@ -1899,4 +1902,11 @@ float CScrollingLayout::getLastRemovedColumnWidth() {
 
 float CScrollingLayout::getLastRemovedColumnLastWidth() {
     return m_lastRemovedColumnLastWidth;
+}
+
+float CScrollingLayout::getWindowRuleValue(PHLWINDOW w, int ruleIdx, float defaultValue) {
+    if (w->m_ruleApplicator->m_otherProps.props.contains(ruleIdx)) {
+        return std::stof(w->m_ruleApplicator->m_otherProps.props.at(ruleIdx)->effect);
+    }
+    return defaultValue;
 }

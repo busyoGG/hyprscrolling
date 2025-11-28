@@ -48,7 +48,7 @@ struct SColumnData {
     std::vector<SP<SScrollingWindowData>> windowDatas;
     float                                 columnSize      = 1.F;
     float                                 columnWidth     = 1.F;
-    float                                 lastColumnWidth = 1.F;
+    float                                 lastColumnWidth = 0.5F;
     WP<SWorkspaceData>                    workspace;
     WP<SScrollingWindowData>              lastFocusedWindow;
 
@@ -109,6 +109,8 @@ class CScrollingLayout : public IHyprLayout {
 
     CBox                             usableAreaFor(PHLMONITOR m);
 
+    int                              g_col_width_idx = 0;
+
   private:
     std::vector<SP<SWorkspaceData>> m_workspaceDatas;
 
@@ -142,6 +144,8 @@ class CScrollingLayout : public IHyprLayout {
 
     void                     applyNodeDataToWindow(SP<SScrollingWindowData> node, bool instant, bool hasWindowsRight, bool hasWindowsLeft);
     void                     focusWindowUpdate(PHLWINDOW pWindow);
+
+    float                    getWindowRuleValue(PHLWINDOW pWindow, int ruleIdx, float defaultValue);
 
     friend struct SWorkspaceData;
 };
