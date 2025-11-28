@@ -520,7 +520,7 @@ void CScrollingLayout::onEnable() {
 
         static const auto PFOLLOW_FOCUS = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:follow_focus");
 
-        // Debug::log(LOG, "scrolling: active window isClicked {}", isClicked);
+        Debug::log(LOG, "scrolling: active window mouse_moved {}", mouse_moved);
         if (!*PFOLLOW_FOCUS && mouse_moved > 0) {
             return;
         }
