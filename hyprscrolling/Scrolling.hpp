@@ -132,6 +132,7 @@ class CScrollingLayout : public IHyprLayout {
 
     struct {
         std::vector<float> configuredWidths;
+        int                currentIdx = 0;
     } m_config;
 
     SP<SScrollingWindowData> findBestNeighbor(SP<SScrollingWindowData> pCurrent, SP<SColumnData> pTargetCol);
