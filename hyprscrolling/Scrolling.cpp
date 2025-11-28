@@ -13,6 +13,7 @@
 #include <hyprutils/string/ConstVarList.hpp>
 #include <hyprutils/utils/ScopeGuard.hpp>
 #include <src/debug/Log.hpp>
+#include <src/managers/HookSystemManager.hpp>
 using namespace Hyprutils::String;
 using namespace Hyprutils::Utils;
 
@@ -520,7 +521,7 @@ void CScrollingLayout::onEnable() {
         static const auto PFOLLOW_FOCUS = CConfigValue<Hyprlang::INT>("plugin:hyprscrolling-mod:follow_focus");
 
         // Debug::log(LOG, "scrolling: active window isClicked {}", isClicked);
-        if (!*PFOLLOW_FOCUS) {
+        if (!*PFOLLOW_FOCUS && mouse_moved) {
             return;
         }
 
@@ -550,6 +551,9 @@ void CScrollingLayout::onEnable() {
         DATA->fitCol(WINDOWDATA->column.lock());
         DATA->recalculate();
     });
+
+    g_pHookSystem->hookDynamic("mouseMove", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = true; });
+    g_pHookSystem->hookDynamic("tick", [this](void* hk, SCallbackInfo& info, std::any param) { mouse_moved = false; });
 
     for (auto const& w : g_pCompositor->m_windows) {
         if (w->m_isFloating || !w->m_isMapped || w->isHidden())

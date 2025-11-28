@@ -123,7 +123,8 @@ class CScrollingLayout : public IHyprLayout {
     float                           m_lastRemovedColumnWidth;
     float                           m_lastRemovedColumnLastWidth;
 
-    int                             m_wsID = 0;
+    int                             m_wsID      = 0;
+    bool                            mouse_moved = false;
 
     struct {
         bool isMovingColumn    = false;
